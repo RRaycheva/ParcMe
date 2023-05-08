@@ -1,1 +1,2 @@
 2.7.6
+Missing path (/Users/rumyanaraycheva/Projects/ParcMe/ios/Pods/hermes-engine/destroot/Library/Frameworks/universal/hermes.xcframework/ios-arm64_x86_64-simulator/dSYMs) from XCFramework 'hermes.xcframework' as defined by 'DebugSymbolsPath' in its `Info.plist` file

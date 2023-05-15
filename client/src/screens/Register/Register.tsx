@@ -1,21 +1,21 @@
 import React, { useState } from 'react'
-import { View, StyleSheet, TouchableOpacity } from 'react-native'
+import { View, TouchableOpacity } from 'react-native'
 import { Text } from 'react-native-paper'
 import Background from '../../components/Background'
-import Logo from '../../components/Logo'
 import Header from '../../components/Header'
 import Button from '../../components/Button'
 import TextInput from '../../components/TextInput'
 import BackButton from '../../components/BackButton'
-import { theme } from '../../theme/theme'
 import { emailValidator, passwordValidator, nameValidator } from '../../helpers/helpers'
+import { styles } from './Register.styles'
+import authService from '../../services/authService'
 
 export default function RegisterScreen({ navigation }) {
   const [name, setName] = useState({ value: '', error: '' })
   const [email, setEmail] = useState({ value: '', error: '' })
   const [password, setPassword] = useState({ value: '', error: '' })
 
-  const onSignUpPressed = () => {
+  const onSignUpPressed = async () => {
     const nameError = nameValidator(name.value)
     const emailError = emailValidator(email.value)
     const passwordError = passwordValidator(password.value)
@@ -29,9 +29,15 @@ export default function RegisterScreen({ navigation }) {
       index: 0,
       routes: [{ name: 'Dashboard' }],
     })
-  }
+    try{
+       const response = await authService.register(name.value, email.value, password.value)
+       console.log(response)
+    }catch(e){
+        console.log(e)
+    }
+}
 
-  return (
+return (
     <Background>
       <BackButton goBack={navigation.goBack} />
       <Header>Create Account</Header>
@@ -84,13 +90,3 @@ export default function RegisterScreen({ navigation }) {
   )
 }
 
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    marginTop: 4,
-  },
-  link: {
-    fontWeight: 'bold',
-    color: theme.colors.primary,
-  },
-})

@@ -8,12 +8,14 @@ import TextInput from '../../components/TextInput'
 import BackButton from '../../components/BackButton'
 import { emailValidator, passwordValidator } from '../../helpers/helpers'
 import { styles } from './Login.styles'
+import authService from '../../services/authService'
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState({ value: '', error: '' })
   const [password, setPassword] = useState({ value: '', error: '' })
 
-  const onLoginPressed = () => {
+ 
+  const onLoginPressed = async () => {
     const emailError = emailValidator(email.value)
     const passwordError = passwordValidator(password.value)
     if (emailError || passwordError) {
@@ -22,9 +24,15 @@ export default function LoginScreen({ navigation }) {
       return
     }
     navigation.reset({
-      index: 0,
-      routes: [{ name: 'Dashboard' }],
-    })
+        index: 0,
+        routes: [{ name: 'Dashboard' }],
+      })
+      try{
+         const response = await authService.login(email.value, password.value)
+         console.log(response)
+      }catch(e){
+          console.log(e)
+      }
   }
 
   return (
@@ -32,6 +40,7 @@ export default function LoginScreen({ navigation }) {
       <BackButton goBack={navigation.goBack} />
       <Header>Welcome back.</Header>
       <TextInput
+      description="Email"
         label="Email"
         returnKeyType="next"
         value={email.value}
@@ -44,6 +53,7 @@ export default function LoginScreen({ navigation }) {
         keyboardType="email-address"
       />
       <TextInput
+       description="Password"
         label="Password"
         returnKeyType="done"
         value={password.value}

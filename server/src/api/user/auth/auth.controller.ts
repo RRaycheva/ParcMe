@@ -22,11 +22,12 @@ export class AuthController {
   @Post('register')
   @UseInterceptors(ClassSerializerInterceptor)
   private register(@Body() body: RegisterDto): Promise<User | never> {
+    console.log(body);
     return this.service.register(body);
   }
 
   @Post('login')
-  private login(@Body() body: LoginDto): Promise<string | never> {
+  private login(@Body() body: LoginDto): Promise<object | never> {
     return this.service.login(body);
   }
 

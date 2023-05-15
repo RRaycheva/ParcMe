@@ -3,7 +3,8 @@ import { theme } from '../../theme/theme'
 import { styles } from './Button.styles'
 import { Button as PapperButton } from 'react-native-paper'
 
-export default function Button({ mode, style, ...props }) {
+export default function Button(props) {
+    const { mode, style }  = props
   return (
     <PapperButton
       style={[

@@ -1,0 +1,13 @@
+{
+  "eslint.lintTask.enable": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true,
+    "eslint.format.enable": true,
+    "source.organizeImports": true,
+    "editor.formatOnSave": true
+  },
+  "editor.tabSize": 2,
+  "editor.defaultFormatter": "rvest.vs-code-prettier-eslint",
+  "editor.snippetSuggestions": "top",
+  "typescript.tsdk": "node_modules/typescript/lib"
+}

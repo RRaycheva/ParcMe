@@ -1,71 +1,73 @@
-import React, { useState } from 'react'
-import { TouchableOpacity, View } from 'react-native'
-import { Text } from 'react-native-paper'
-import Background from '../../components/Background'
-import Header from '../../components/Header/'
-import Button from '../../components/Button'
-import TextInput from '../../components/TextInput'
-import BackButton from '../../components/BackButton'
-import { emailValidator, passwordValidator } from '../../helpers/helpers'
-import { styles } from './Login.styles'
-import authService from '../../services/authService'
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import React, { useState } from 'react';
+import { TouchableOpacity, View } from 'react-native';
+import { Text } from 'react-native-paper';
+import { connect } from 'react-redux';
+import Background from '../../components/Background';
+import Button from '../../components/Button';
+import Header from '../../components/Header/';
+import TextInput from '../../components/TextInput';
+import { emailValidator, passwordValidator } from '../../helpers/helpers';
+import { setUser } from '../../redux/actions/auth';
+import { RootState } from '../../redux/store';
+import authService, { AuthResponseDto } from '../../services/authService';
+import { styles } from './Login.styles';
 
-export default function LoginScreen({ navigation }) {
-  const [email, setEmail] = useState({ value: '', error: '' })
-  const [password, setPassword] = useState({ value: '', error: '' })
+interface LoginScreenProps extends NativeStackScreenProps<any> {
+  setUser: (user: AuthResponseDto) => void;
+}
 
- 
+function LoginScreen({ navigation, setUser }: LoginScreenProps) {
+  const [email, setEmail] = useState({ value: 'admin@parc.me', error: '' });
+  const [password, setPassword] = useState({ value: '12345678', error: '' });
+
   const onLoginPressed = async () => {
-    const emailError = emailValidator(email.value)
-    const passwordError = passwordValidator(password.value)
+    const emailError = emailValidator(email.value);
+    const passwordError = passwordValidator(password.value);
     if (emailError || passwordError) {
-      setEmail({ ...email, error: emailError })
-      setPassword({ ...password, error: passwordError })
-      return
+      setEmail({ ...email, error: emailError });
+      setPassword({ ...password, error: passwordError });
+      return;
     }
-    navigation.reset({
-        index: 0,
-        routes: [{ name: 'Dashboard' }],
-      })
-      try{
-         const response = await authService.login(email.value, password.value)
-         console.log(response)
-      }catch(e){
-          console.log(e)
-      }
-  }
+    try {
+      const response = await authService.login(email.value, password.value);
+      setUser(response);
+      navigation.reset({ index: 0, routes: [{ name: 'Launcher' }] });
+      console.log(response);
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   return (
     <Background>
-      <BackButton goBack={navigation.goBack} />
       <Header>Welcome back.</Header>
       <TextInput
-      description="Email"
+        description="Email"
         label="Email"
         returnKeyType="next"
         value={email.value}
-        onChangeText={(text) => setEmail({ value: text, error: '' })}
+        onChangeText={text => setEmail({ value: text, error: '' })}
         error={!!email.error}
         errorText={email.error}
         autoCapitalize="none"
-        autoCompleteType="email"
+        autoComplete="email"
         textContentType="emailAddress"
         keyboardType="email-address"
       />
       <TextInput
-       description="Password"
+        description="Password"
         label="Password"
         returnKeyType="done"
         value={password.value}
-        onChangeText={(text) => setPassword({ value: text, error: '' })}
+        onChangeText={text => setPassword({ value: text, error: '' })}
         error={!!password.error}
         errorText={password.error}
         secureTextEntry
       />
       <View style={styles.forgotPassword}>
         <TouchableOpacity
-          onPress={() => navigation.navigate('ResetPasswordScreen')}
-        >
+          onPress={() => navigation.navigate('ResetPasswordScreen')}>
           <Text style={styles.forgot}>Forgot your password?</Text>
         </TouchableOpacity>
       </View>
@@ -79,5 +81,18 @@ export default function LoginScreen({ navigation }) {
         </TouchableOpacity>
       </View>
     </Background>
-  )
+  );
 }
+
+const mapStateToProps = ({ auth }: RootState) => {
+  return {
+    auth,
+  };
+};
+export default React.memo(
+  connect(mapStateToProps, {
+    setUser,
+  })(LoginScreen),
+);
+
+// export default React.memo(LoginScreen);

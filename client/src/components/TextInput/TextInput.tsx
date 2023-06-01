@@ -1,10 +1,18 @@
-import React from 'react'
-import { View,Text } from 'react-native'
-import { TextInput as Input } from 'react-native-paper'
-import { theme } from '../../theme/theme'
-import { styles } from './TextInput.styles'
+import React from 'react';
+import { Text, View } from 'react-native';
+import { TextInput as Input, TextInputProps } from 'react-native-paper';
+import { theme } from '../../theme/theme';
+import { styles } from './TextInput.styles';
 
-export default function TextInput({ errorText, description, ...props }) {
+interface CustomTextInputProps extends TextInputProps {
+  errorText?: string;
+  description?: string;
+}
+export default function TextInput({
+  errorText,
+  description,
+  ...props
+}: CustomTextInputProps) {
   return (
     <View style={styles.container}>
       <Input
@@ -19,6 +27,5 @@ export default function TextInput({ errorText, description, ...props }) {
       ) : null}
       {errorText ? <Text style={styles.error}>{errorText}</Text> : null}
     </View>
-  )
+  );
 }
-

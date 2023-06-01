@@ -2,8 +2,9 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '@/api/user/user.entity';
 import { Repository } from 'typeorm';
-import { RegisterDto, LoginDto } from './auth.dto';
+import { RegisterDto, LoginDto, AuthResponseDto } from './auth.dto';
 import { AuthHelper } from './auth.helper';
+import { Request } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -13,7 +14,7 @@ export class AuthService {
   @Inject(AuthHelper)
   private readonly helper: AuthHelper;
 
-  public async register(body: RegisterDto): Promise<User | never> {
+  public async register(body: RegisterDto): Promise<AuthResponseDto | never> {
     const { name, email, password }: RegisterDto = body;
     let user: User = await this.repository.findOne({ where: { email } });
 
@@ -27,10 +28,12 @@ export class AuthService {
     user.email = email;
     user.password = this.helper.encodePassword(password);
 
-    return this.repository.save(user);
+    const savedUser = await this.repository.save(user);
+    const { password: _password, ...simpleUser } = savedUser;
+    return { token: this.helper.generateToken(user), user: simpleUser as User };
   }
 
-  public async login(body: LoginDto): Promise<object | never> {
+  public async login(body: LoginDto): Promise<AuthResponseDto | never> {
     const { email, password }: LoginDto = body;
     const user: User = await this.repository.findOne({ where: { email } });
 
@@ -46,18 +49,32 @@ export class AuthService {
     if (!isPasswordValid) {
       throw new HttpException('No user found', HttpStatus.NOT_FOUND);
     }
-
-    this.repository.update(user.id, { lastLoginAt: new Date() });
-
-    console.log('trying to login user', user);
-
+    const updatedUser = {
+      lastLoginAt: new Date(),
+    };
+    await this.repository.update(user.id, updatedUser);
     const { password: _password, ...simpleUser } = user;
-    return { token: this.helper.generateToken(user), user: simpleUser };
+    return { token: this.helper.generateToken(user), user: simpleUser as User };
   }
 
-  public async refresh(user: User): Promise<string> {
-    this.repository.update(user.id, { lastLoginAt: new Date() });
+  public async refresh(user: User): Promise<AuthResponseDto> {
+    const updatedUser = {
+      lastLoginAt: new Date(),
+    };
+    await this.repository.update(user.id, updatedUser);
+    const { password: _password, ...simpleUser } = user;
+    return { token: this.helper.generateToken(user), user: simpleUser as User };
+  }
 
-    return this.helper.generateToken(user);
+  public async check(req: Request): Promise<AuthResponseDto | false> {
+    try {
+      const token = req.get('Authorization').replace('Bearer', '').trim();
+      const userDecoded = await this.helper.validate(token);
+      const userLoginResponse = await this.refresh(userDecoded);
+      return userLoginResponse;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
   }
 }

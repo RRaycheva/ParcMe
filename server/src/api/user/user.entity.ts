@@ -18,4 +18,7 @@ export class User extends BaseEntity {
 
   @Column({ type: 'timestamp', nullable: true, default: null })
   public lastLoginAt: Date | null;
+
+  @Column({ type: 'boolean', default: false })
+  public isAdmin: boolean;
 }

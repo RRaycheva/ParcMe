@@ -14,3 +14,11 @@ export const SearchContainer = styled(Surface)`
 export const CardList = styled(FlatList)`
   padding-top: 8px;
 `;
+
+export const MapContainer = styled(View)`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+`;

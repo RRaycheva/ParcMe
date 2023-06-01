@@ -1,39 +1,41 @@
 import {
-  createNativeStackNavigator,
-  NativeStackNavigationOptions,
-} from '@react-navigation/native-stack';
-import { connect } from 'react-redux';
+  CardStyleInterpolators,
+  StackNavigationOptions,
+  createStackNavigator,
+} from '@react-navigation/stack';
 import React from 'react';
-import TabScreens from './TabScreens';
+import AddNewPlace from '../screens/AddNewPlace/AddNewPlace';
+import { Launcher } from '../screens/Launcher';
 import Login from '../screens/Login';
 import Register from '../screens/Register';
+import TabScreens from './TabScreens';
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 
-const defaultScreenOptions: NativeStackNavigationOptions = {
+const defaultScreenOptions: StackNavigationOptions = {
   headerShown: false,
+  cardStyleInterpolator: CardStyleInterpolators.forFadeFromCenter,
+  cardOverlayEnabled: true,
 };
 
-function MainScreens(props) {
+function MainScreens() {
   return (
     <Stack.Navigator
-      initialRouteName="Main"
+      initialRouteName="Launcher"
       screenOptions={defaultScreenOptions}>
-       { props.isLoggedIn ? 
-         <Stack.Screen name="Dashboard" component={TabScreens} />
-         : 
-         <Stack.Screen name="LoginScreen" component={Login} />
-        }
-        <Stack.Screen name="RegisterScreen" component={Register} />
+      <Stack.Screen name="Launcher" component={Launcher} />
+      <Stack.Screen name="LoginScreen" component={Login} />
+      <Stack.Screen name="RegisterScreen" component={Register} />
+      <Stack.Screen name="Dashboard" component={TabScreens} />
+      <Stack.Screen
+        name="AddNewPlace"
+        options={{
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+        }}
+        component={AddNewPlace}
+      />
     </Stack.Navigator>
   );
 }
-const mapStateToProps = function(state) {
-    const states = state.reducers
-    console.log(state.reducers.auth)
-    return {
-    isLoggedIn: states.auth.isAuth,
-    }
-  }
-export default connect(mapStateToProps)(MainScreens);
 
+export default React.memo(MainScreens);

@@ -1,6 +1,28 @@
-import { SafeAreaView } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
+import { List, Text } from 'react-native-paper';
 import styled from 'styled-components/native';
 
-export const Container = styled(SafeAreaView)`
-  flex: 1;
+export const styles = StyleSheet.create({
+  listSection: {
+    flex: 1,
+    width: '100%',
+  },
+  logoutButton: { maxWidth: '60%' },
+  scrollContainer: { flex: 1, alignItems: 'center' },
+});
+
+export const PageTitle = styled(Text)`
+  font-weight: bold;
+  font-size: 32px;
+  align-self: flex-start;
+`;
+
+export const Container = styled(ScrollView)`
+  /* margin: 0 24px; */
+  padding: 48px 18px;
+`;
+
+export const ListSectionHeader = styled(List.Subheader)`
+  font-weight: bold;
+  font-size: 18px;
 `;

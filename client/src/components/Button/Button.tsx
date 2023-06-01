@@ -1,10 +1,10 @@
-import React from 'react'
-import { theme } from '../../theme/theme'
-import { styles } from './Button.styles'
-import { Button as PapperButton } from 'react-native-paper'
+import React from 'react';
+import { ButtonProps, Button as PapperButton } from 'react-native-paper';
+import { theme } from '../../theme/theme';
+import { styles } from './Button.styles';
 
-export default function Button(props) {
-    const { mode, style }  = props
+export default function Button(props: ButtonProps) {
+  const { mode, style } = props;
   return (
     <PapperButton
       style={[
@@ -16,6 +16,5 @@ export default function Button(props) {
       mode={mode}
       {...props}
     />
-  )
+  );
 }
-

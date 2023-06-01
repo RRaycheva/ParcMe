@@ -1,14 +1,17 @@
 import { AnyAction } from 'redux';
-import { REGISTER } from '../constants/actionTypes';
+import { AuthResponseDto } from '../../services/authService';
+import { CLEAR_USER, SET_USER } from '../constants/actionTypes';
 
-const INITITIAL_STATE = {
-  isAuth: false,
-};
+export interface AuthState extends AuthResponseDto {}
+
+const INITITIAL_STATE: Partial<AuthState> = {};
 
 export default (state = INITITIAL_STATE, { payload, type }: AnyAction) => {
   switch (type) {
-    case REGISTER:
-      return { ...state, isAuth: true };
+    case SET_USER:
+      return { ...state, ...payload };
+    case CLEAR_USER:
+      return INITITIAL_STATE;
     default:
       return state;
   }

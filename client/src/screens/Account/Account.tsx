@@ -5,13 +5,9 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { connect } from 'react-redux';
 import Button from '../../components/Button';
+import { PageTitle } from '../../components/PageTitle';
 import { clearUser } from '../../redux/actions/auth';
-import {
-  Container,
-  ListSectionHeader,
-  PageTitle,
-  styles,
-} from './Account.styles';
+import { Container, ListSectionHeader, styles } from './Account.styles';
 
 interface AccountProps extends NativeStackScreenProps<any> {
   clearUser: () => void;

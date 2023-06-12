@@ -2,7 +2,7 @@ import { Asset } from 'react-native-image-picker';
 import { Service } from './baseService';
 
 export interface GarageDto {
-  id?: number;
+  id?: string;
   name: string;
   latitude: number;
   longitude: number;
@@ -10,6 +10,12 @@ export interface GarageDto {
   pricePerHour: number;
   pictures?: string[];
   dateOfPost?: Date;
+  description: string;
+}
+
+export interface FavouritesDto {
+  garageId: string;
+  garage: GarageDto;
 }
 
 class GarageService extends Service {
@@ -24,7 +30,7 @@ class GarageService extends Service {
     return response;
   }
 
-  async uploadImages(id: number, fileUris: Asset[]) {
+  async uploadImages(id: number | string, fileUris: Asset[]) {
     const headers = { 'Content-Type': 'multipart/form-data' };
     const formData = new FormData();
     fileUris.forEach(async f => {
@@ -45,21 +51,33 @@ class GarageService extends Service {
   }
 
   async getAll(): Promise<GarageDto[]> {
-    const headers = { 'Content-Type': 'application/json' };
     const response = await this.handleRequest(
       `${this.defaultEndpoint}/garage`,
       'GET',
-      headers,
     );
     return response;
   }
 
-  async deleteAll() {
+  async getFavourites(): Promise<FavouritesDto[]> {
     const response = await this.handleRequest(
-      `${this.defaultEndpoint}/garage`,
-      'DELETE',
+      `${this.defaultEndpoint}/user/favourites`,
+      'GET',
     );
     return response;
+  }
+
+  async addToFavourite(garageId: string) {
+    await this.handleRequest(
+      `${this.defaultEndpoint}/user/favourite/${garageId}`,
+      'GET',
+    );
+  }
+
+  async removeFromFavourite(garageId: string) {
+    await this.handleRequest(
+      `${this.defaultEndpoint}/user/favourite/${garageId}`,
+      'DELETE',
+    );
   }
 }
 

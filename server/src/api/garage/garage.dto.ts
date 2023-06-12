@@ -1,5 +1,11 @@
 import { Trim } from 'class-sanitizer';
-import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsNumber,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 import { User } from '../user/user.entity';
 import { LoginDto } from '../user/auth/auth.dto';
 
@@ -18,6 +24,10 @@ export class GarageDto {
 
   @IsNumber()
   public readonly pricePerHour: number;
+
+  @IsString()
+  @MaxLength(200)
+  public readonly description: string;
 
   @IsArray()
   @IsOptional()

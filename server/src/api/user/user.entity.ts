@@ -33,6 +33,9 @@ export class User extends BaseEntity {
   @Column({ type: 'boolean', default: false })
   public isAdmin: boolean;
 
+  @Column({ default: '' })
+  public profile_picture: string;
+
   @OneToMany(() => Garage, (garage) => garage.user, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',

@@ -1,48 +1,59 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import React from 'react';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import React, { ComponentType } from 'react';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-import { createSharedElementStackNavigator } from 'react-navigation-shared-element';
-import { DetailPage } from '../components/DetailPage';
+import {
+  SharedElementSceneComponent,
+  createSharedElementStackNavigator,
+} from 'react-navigation-shared-element';
 import Account from '../screens/Account';
 import Home from '../screens/Home';
 import Inbox from '../screens/Inbox';
 import Wishlist from '../screens/Wishlist';
-import {
-  defaultScreenOptions,
-  defaultTabScreenOptions,
-  sharedElementOptions,
-} from './options';
+import { defaultTabScreenOptions } from './options';
 
 const Tab = createBottomTabNavigator();
-const Stack = createSharedElementStackNavigator();
 
-function HomeScreens() {
-  return (
-    <Stack.Navigator screenOptions={defaultScreenOptions}>
-      <Stack.Screen name="Home" component={Home} />
-      <Stack.Screen
-        name="DetailPage"
-        component={DetailPage}
-        options={sharedElementOptions}
-      />
-    </Stack.Navigator>
+const wrapInSharedElementStack = (
+  Screen: SharedElementSceneComponent<any>,
+  name: string,
+): ComponentType<any> => {
+  const SharedStack = createSharedElementStackNavigator();
+  return () => (
+    <SharedStack.Navigator
+      screenOptions={{ headerShown: false }}
+      initialRouteName={name}>
+      <SharedStack.Screen name={name} component={Screen} />
+    </SharedStack.Navigator>
   );
-}
+};
+
+/**
+ * Make every tab a shared element stack navigator
+ */
+const HomeScreen = wrapInSharedElementStack(Home, 'Home');
+const WishlistScreen = wrapInSharedElementStack(Wishlist, 'Wishlist');
 
 function TabScreens() {
   return (
     <Tab.Navigator screenOptions={defaultTabScreenOptions}>
       <Tab.Screen
         name="HomeTab"
-        component={HomeScreens}
+        component={HomeScreen}
         options={{
           tabBarLabel: 'Home',
-          tabBarIcon: props => <Icon name="search" {...props} />,
+          tabBarIcon: props => <FontAwesome name="search" {...props} />,
         }}
       />
-      <Tab.Screen name="Wishlist" component={Wishlist} />
+      <Tab.Screen
+        name="WishlistTab"
+        component={WishlistScreen}
+        options={{
+          tabBarLabel: 'Wishlist',
+          tabBarIcon: props => <FontAwesome name="heart-o" {...props} />,
+        }}
+      />
       <Tab.Screen name="Inbox" component={Inbox} />
       <Tab.Screen
         name="Account"

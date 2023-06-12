@@ -1,42 +1,34 @@
 import { BottomTabNavigationOptions } from '@react-navigation/bottom-tabs';
 import {
   CardStyleInterpolators,
-  StackCardInterpolationProps,
   StackNavigationOptions,
 } from '@react-navigation/stack';
 import { Dimensions } from 'react-native';
 import ModalHeader from '../components/ModalHeader';
-import { theme } from '../theme/theme';
+import { defaultShadow, theme } from '../theme/theme';
 
 export const defaultTabScreenOptions: BottomTabNavigationOptions = {
   headerShown: false,
-  lazy: true,
+  lazy: false,
   tabBarActiveTintColor: theme.colors.primary,
 };
 
 export const defaultScreenOptions: StackNavigationOptions = {
   headerShown: false,
+  animationTypeForReplace: 'pop',
   cardStyle: { backgroundColor: 'white' },
 };
 
 export const sharedElementOptions: StackNavigationOptions = {
-  presentation: 'modal',
+  presentation: 'card',
   detachPreviousScreen: false,
-  cardStyle: { backgroundColor: 'transparent' },
-  cardStyleInterpolator: (options: StackCardInterpolationProps) => {
-    return {
-      ...CardStyleInterpolators.forModalPresentationIOS(options),
-      cardStyle: {
-        ...CardStyleInterpolators.forModalPresentationIOS(options).cardStyle,
-        opacity: options.index === 0 ? 0.5 : 1,
-        backgroundColor: 'transparent',
-        margin: 0,
-        transform: [],
-      },
-      overlayStyle: { opacity: 0 },
-    };
+  cardStyle: {
+    backgroundColor: 'transparent',
+    ...defaultShadow,
   },
+  cardStyleInterpolator: CardStyleInterpolators.forFadeFromCenter,
   headerShown: false,
+  gestureEnabled: false,
 };
 
 export const modalOptions: StackNavigationOptions = {

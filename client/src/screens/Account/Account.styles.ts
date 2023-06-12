@@ -1,5 +1,5 @@
 import { ScrollView, StyleSheet } from 'react-native';
-import { List, Text } from 'react-native-paper';
+import { List } from 'react-native-paper';
 import styled from 'styled-components/native';
 
 export const styles = StyleSheet.create({
@@ -10,12 +10,6 @@ export const styles = StyleSheet.create({
   logoutButton: { maxWidth: '60%' },
   scrollContainer: { flex: 1, alignItems: 'center' },
 });
-
-export const PageTitle = styled(Text)`
-  font-weight: bold;
-  font-size: 32px;
-  align-self: flex-start;
-`;
 
 export const Container = styled(ScrollView)`
   /* margin: 0 24px; */

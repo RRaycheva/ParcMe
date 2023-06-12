@@ -1,6 +1,6 @@
 import React from 'react';
 import * as Animatable from 'react-native-animatable';
-import CloseButton from '../CloseButton';
+import { CloseButton } from '../IconButtons';
 
 function ModalHeader() {
   return (

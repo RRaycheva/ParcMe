@@ -6,7 +6,6 @@ import { GarageDto } from './garage.dto';
 import { createReadStream, existsSync } from 'fs';
 import { rm } from 'fs/promises';
 import { User } from '../user/user.entity';
-import { LoginDto } from '../user/auth/auth.dto';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require('path');
 // eslint-disable-next-line @typescript-eslint/no-var-requires

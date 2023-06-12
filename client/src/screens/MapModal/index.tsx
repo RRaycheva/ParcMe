@@ -5,6 +5,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Animated } from 'react-native';
 import styled from 'styled-components';
 import MapButton from '../../components/MapButton';
+import { defaultShadow } from '../../theme/theme';
 
 Mapbox.setAccessToken(MAPBOX_TOKEN);
 
@@ -51,11 +52,7 @@ function MapSheet({ title }: MapSheetProps) {
         index={0}
         snapPoints={snapPoints}
         enablePanDownToClose={!title}
-        style={{
-          shadowOpacity: 0.2,
-          shadowRadius: 5,
-          shadowColor: 'black',
-        }}
+        style={defaultShadow}
         onAnimate={handleSheetChanges}>
         {title && (
           <Title

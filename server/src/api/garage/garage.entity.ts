@@ -33,6 +33,9 @@ export class Garage extends BaseEntity {
   @Column({ type: 'timestamp', nullable: true, default: null })
   public dateOfPost: Date | null;
 
+  @Column({ default: '' })
+  public description: string;
+
   @ManyToOne(() => User, (user) => user.garages, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',

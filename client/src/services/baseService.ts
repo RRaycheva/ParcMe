@@ -1,4 +1,5 @@
 import { PARCK_ME_SERVER } from '@env';
+import { isEmpty } from 'lodash';
 import { Falsy } from 'react-native';
 import { getData } from '../helpers/helpers';
 
@@ -16,7 +17,11 @@ export class Service {
     try {
       const savedToken: string | Falsy = await getData(this.USER_TOKEN_KEY);
       console.log('URL', url, method);
-      const headers = { ..._headers, Authorization: `Bearer ${savedToken}` };
+      const headers = {
+        'Content-Type': 'application/json',
+        ..._headers,
+        Authorization: `Bearer ${savedToken}`,
+      };
       const response = await fetch(url, {
         method,
         headers,
@@ -24,10 +29,14 @@ export class Service {
       });
 
       const jsonResponse = await response.json();
-      return await jsonResponse;
+      if (isEmpty(jsonResponse.error)) {
+        return await jsonResponse;
+      } else {
+        throw jsonResponse;
+      }
     } catch (error) {
       console.error(error);
-      return false;
+      throw error;
     }
   }
 }

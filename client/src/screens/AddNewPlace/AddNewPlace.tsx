@@ -2,7 +2,7 @@ import { GeocodeFeature } from '@mapbox/mapbox-sdk/services/geocoding';
 import { StackScreenProps } from '@react-navigation/stack';
 import { isEmpty, isNil, toNumber } from 'lodash';
 import React, { useCallback, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { SafeAreaView, ScrollView, View } from 'react-native';
 import {
   Asset,
   ImagePickerResponse,
@@ -24,6 +24,10 @@ import {
 type Props = StackScreenProps<any>;
 function AddNewPlace({ navigation }: Props) {
   const [garageName, setGarageName] = useState({ value: '', error: '' });
+  const [garageDescription, setGarageDescription] = useState({
+    value: '',
+    error: '',
+  });
   const [price, setPrice] = useState({ value: '', error: '' });
   const [location, setChoosenLocation] = useState<GeocodeFeature>();
   const [images, setImages] = useState<Asset[]>([]);
@@ -33,22 +37,32 @@ function AddNewPlace({ navigation }: Props) {
     if (isEmpty(location)) {
       return;
     }
-    setLoading(true);
-    // First create the garage instance
-    const response = await garageService.add({
-      name: garageName.value,
-      pricePerHour: toNumber(price.value),
-      addressName: location.place_name,
-      longitude: location.center[0],
-      latitude: location.center[1],
-    });
-    //
-    if (!isEmpty(images) && !isNil(response.id)) {
-      await garageService.uploadImages(response.id, images);
-    }
-    setLoading(false);
-    navigation.goBack();
-  }, [garageName.value, images, location, navigation, price.value]);
+    try {
+      setLoading(true);
+      // First create the garage instance
+      const response = await garageService.add({
+        name: garageName.value,
+        description: garageDescription.value,
+        pricePerHour: toNumber(price.value),
+        addressName: location.place_name,
+        longitude: location.center[0],
+        latitude: location.center[1],
+      });
+      //
+      if (!isEmpty(images) && !isNil(response.id)) {
+        await garageService.uploadImages(response.id, images);
+      }
+      setLoading(false);
+      navigation.goBack();
+    } catch (error) {}
+  }, [
+    garageName.value,
+    images,
+    location,
+    navigation,
+    price.value,
+    garageDescription.value,
+  ]);
 
   const onImagePickerResponse = useCallback((response: ImagePickerResponse) => {
     if (!response.assets) {
@@ -75,18 +89,12 @@ function AddNewPlace({ navigation }: Props) {
     );
 
   return (
-    <ScrollView contentContainerStyle={{ alignItems: 'center', flex: 1 }}>
-      {loading && <ActivityIndicator />}
+    <ScrollView contentContainerStyle={{ flex: 1 }}>
+      <SafeAreaView />
       <Background>
-        {/* <CloseButtonContainer onPress={navigation.goBack}>
-          <SafeAreaView>
-            <MaterialIcons name="close" size={32} />
-          </SafeAreaView>
-        </CloseButtonContainer> */}
         <Title>Add a new place</Title>
         <CustomTextInput
           label="Garage Name"
-          returnKeyType="next"
           value={garageName.value}
           onChangeText={text => {
             setGarageName({ value: text, error: '' });
@@ -96,8 +104,18 @@ function AddNewPlace({ navigation }: Props) {
         />
         <LocationSearchInput onPress={setChoosenLocation} />
         <CustomTextInput
+          label="Description"
+          multiline
+          maxLength={200}
+          value={garageDescription.value}
+          onChangeText={text => {
+            setGarageDescription({ value: text, error: '' });
+          }}
+          error={!!garageDescription.error}
+          autoCapitalize="none"
+        />
+        <CustomTextInput
           label="Price"
-          returnKeyType="next"
           value={price.value}
           onChangeText={text => {
             setPrice({ value: text, error: '' });
@@ -127,6 +145,7 @@ function AddNewPlace({ navigation }: Props) {
         <Button mode="contained" onPress={addNewPlace}>
           Add
         </Button>
+        {loading && <ActivityIndicator />}
       </Background>
     </ScrollView>
   );

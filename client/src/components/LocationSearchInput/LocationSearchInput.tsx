@@ -96,6 +96,7 @@ function LocationSearchInput(props: LocationSearchInputProps) {
         left={<TextInput.Icon icon={returnLocationIcon} />}
         label="Location"
         returnKeyType="next"
+        multiline
         value={choosenLocation?.place_name || locationQuery.value}
         onFocus={() => setLocationSearchActive(true)}
         onChangeText={text => {

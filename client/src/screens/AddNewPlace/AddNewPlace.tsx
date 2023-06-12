@@ -1,140 +1,134 @@
-import { MAPBOX_TOKEN } from '@env';
+import { GeocodeFeature } from '@mapbox/mapbox-sdk/services/geocoding';
 import { StackScreenProps } from '@react-navigation/stack';
-import { debounce } from 'lodash';
-import React, { useDeferredValue, useEffect, useState } from 'react';
-import { Text, TextInput } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/FontAwesome5';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { isEmpty, isNil, toNumber } from 'lodash';
+import React, { useCallback, useState } from 'react';
+import { ScrollView, View } from 'react-native';
+import {
+  Asset,
+  ImagePickerResponse,
+  launchImageLibrary,
+} from 'react-native-image-picker';
+import { ActivityIndicator } from 'react-native-paper';
 import Background from '../../components/Background';
 import Button from '../../components/Button';
+import LocationSearchInput from '../../components/LocationSearchInput';
 import CustomTextInput from '../../components/TextInput';
-import { theme } from '../../theme/theme';
+import garageService from '../../services/garageService';
 import {
-  CloseButtonContainer,
-  LocationOverlay,
-  SearchContainer,
-  SearchItemSubText,
-  SearchItemText,
-  SearchItemView,
+  ImagePreview,
+  ImagePreviewContainer,
+  ImagePreviewTitle,
+  Title,
 } from './AddNewPlace.style';
-
-const mbxClient = require('@mapbox/mapbox-sdk');
-const mbxGeocoding = require('@mapbox/mapbox-sdk/services/geocoding');
-
-const baseClient = mbxClient({ accessToken: MAPBOX_TOKEN });
-const geocodingService = mbxGeocoding(baseClient);
 
 type Props = StackScreenProps<any>;
 function AddNewPlace({ navigation }: Props) {
-  const [garageName, setGarageName] = useState<any>({ value: '', error: '' });
-  const [locationQuery, setLocationQuery] = useState({ value: '', error: '' });
-  const [locationSearchActive, setLocationSearchActive] = useState(false);
+  const [garageName, setGarageName] = useState({ value: '', error: '' });
   const [price, setPrice] = useState({ value: '', error: '' });
-  const [locationResponse, setLocationResponse] = useState<any>();
-  const [choosenLocation, setChoosenLocation] = useState<any>();
-  const defferedSearch = useDeferredValue(locationQuery);
+  const [location, setChoosenLocation] = useState<GeocodeFeature>();
+  const [images, setImages] = useState<Asset[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    setChoosenLocation(null);
-    const debounced = debounce(() => {
-      if (defferedSearch.value) {
-        geocodingService
-          .forwardGeocode({
-            query: defferedSearch.value,
-            // limit: 2,
-          })
-          .send()
-          .then(response => {
-            const match = response.body;
-            console.log(match.features);
-            setLocationResponse(match.features);
-          });
-      } else if (defferedSearch.value.length === 0) {
-        setLocationResponse(undefined);
-      }
-    }, 500);
-    debounced();
-    return () => {
-      debounced.cancel();
-    };
-  }, [defferedSearch]);
+  const addNewPlace = useCallback(async () => {
+    if (isEmpty(location)) {
+      return;
+    }
+    setLoading(true);
+    // First create the garage instance
+    const response = await garageService.add({
+      name: garageName.value,
+      pricePerHour: toNumber(price.value),
+      addressName: location.place_name,
+      longitude: location.center[0],
+      latitude: location.center[1],
+    });
+    //
+    if (!isEmpty(images) && !isNil(response.id)) {
+      await garageService.uploadImages(response.id, images);
+    }
+    setLoading(false);
+    navigation.goBack();
+  }, [garageName.value, images, location, navigation, price.value]);
 
-  const returnLocationIcon = () => {
-    return (
-      <Icon name="search-location" size={24} color={theme.colors.secondary} />
-    );
-  };
+  const onImagePickerResponse = useCallback((response: ImagePickerResponse) => {
+    if (!response.assets) {
+      return;
+    }
+    // const parsedImages = [...response.assets.flatMap(i => i || [])];
+    const parsedImages = response.assets.filter(Boolean);
+    !isEmpty(parsedImages) && setImages(parsedImages);
+  }, []);
 
-  const handlePressLocation = (location: any) => {
-    setChoosenLocation(location);
-    setLocationSearchActive(false);
-    console.log('choosenLocation', choosenLocation);
-    // setLocationQuery({ value: e.place_name, error: '' });
-  };
-
-  const renderSearchResponses = () =>
-    locationResponse &&
-    locationSearchActive && (
-      <LocationOverlay>
-        <SearchContainer>
-          {locationResponse.map(e => (
-            <SearchItemView key={e.id} onPress={() => handlePressLocation(e)}>
-              <SearchItemText>{e.text}</SearchItemText>
-              <SearchItemSubText>{e.place_name}</SearchItemSubText>
-            </SearchItemView>
+  const renderImagePreviews = () =>
+    !isEmpty(images) && (
+      <View>
+        <ImagePreviewTitle>Images</ImagePreviewTitle>
+        <ImagePreviewContainer>
+          {images.map(i => (
+            <ImagePreview
+              key={`image-preview-${i.fileName}`}
+              source={{ uri: i.uri }}
+            />
           ))}
-        </SearchContainer>
-      </LocationOverlay>
+        </ImagePreviewContainer>
+      </View>
     );
 
   return (
-    <Background>
-      <CloseButtonContainer onPress={navigation.goBack}>
-        <MaterialIcons name="close" size={32} />
-      </CloseButtonContainer>
-      <Text>AddNewPlace</Text>
-      <CustomTextInput
-        label="Garage Name"
-        returnKeyType="next"
-        value={garageName.value}
-        onChangeText={text => {
-          setGarageName({ value: text, error: '' });
-        }}
-        error={!!garageName.error}
-        autoCapitalize="none"
-      />
-      <CustomTextInput
-        left={<TextInput.Icon icon={returnLocationIcon} />}
-        label="Location"
-        returnKeyType="next"
-        value={choosenLocation?.place_name || locationQuery.value}
-        onFocus={() => setLocationSearchActive(true)}
-        onChangeText={text => {
-          setLocationQuery({ value: text, error: '' });
-        }}
-        error={!!locationQuery.error}
-        autoCapitalize="none"
-        textContentType="fullStreetAddress"
-      />
-      {renderSearchResponses()}
-      <CustomTextInput
-        label="Price"
-        returnKeyType="next"
-        value={price.value}
-        onChangeText={text => {
-          setPrice({ value: text, error: '' });
-        }}
-        error={!!price.error}
-        autoCapitalize="none"
-        keyboardType="number-pad"
-      />
-      <Button
-        mode="contained"
-        // onPress={onSignUpPressed}
-        style={{ marginTop: 24 }}>
-        Next
-      </Button>
-    </Background>
+    <ScrollView contentContainerStyle={{ alignItems: 'center', flex: 1 }}>
+      {loading && <ActivityIndicator />}
+      <Background>
+        {/* <CloseButtonContainer onPress={navigation.goBack}>
+          <SafeAreaView>
+            <MaterialIcons name="close" size={32} />
+          </SafeAreaView>
+        </CloseButtonContainer> */}
+        <Title>Add a new place</Title>
+        <CustomTextInput
+          label="Garage Name"
+          returnKeyType="next"
+          value={garageName.value}
+          onChangeText={text => {
+            setGarageName({ value: text, error: '' });
+          }}
+          error={!!garageName.error}
+          autoCapitalize="none"
+        />
+        <LocationSearchInput onPress={setChoosenLocation} />
+        <CustomTextInput
+          label="Price"
+          returnKeyType="next"
+          value={price.value}
+          onChangeText={text => {
+            setPrice({ value: text, error: '' });
+          }}
+          error={!!price.error}
+          autoCapitalize="none"
+          keyboardType="number-pad"
+        />
+        <Button
+          mode="outlined"
+          onPress={() =>
+            launchImageLibrary(
+              {
+                mediaType: 'photo',
+                selectionLimit: 4,
+                includeBase64: false,
+                quality: 0.8,
+                maxWidth: 1000,
+                maxHeight: 1000,
+              },
+              onImagePickerResponse,
+            )
+          }>
+          Add images
+        </Button>
+        {renderImagePreviews()}
+        <Button mode="contained" onPress={addNewPlace}>
+          Add
+        </Button>
+      </Background>
+    </ScrollView>
   );
 }
 

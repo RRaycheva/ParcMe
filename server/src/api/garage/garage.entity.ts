@@ -1,4 +1,11 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { User } from '../user/user.entity';
 
 @Entity()
 export class Garage extends BaseEntity {
@@ -21,8 +28,14 @@ export class Garage extends BaseEntity {
   public pricePerHour: number;
 
   @Column({ type: 'varchar', array: true, default: [] })
-  public picture: string[];
+  public pictures: string[];
 
   @Column({ type: 'timestamp', nullable: true, default: null })
   public dateOfPost: Date | null;
+
+  @ManyToOne(() => User, (user) => user.garages, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
+  user: User;
 }

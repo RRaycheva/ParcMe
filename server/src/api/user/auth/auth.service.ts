@@ -77,4 +77,8 @@ export class AuthService {
       return false;
     }
   }
+
+  public async getUserFromToken(token: string) {
+    return await this.helper.validate(token);
+  }
 }

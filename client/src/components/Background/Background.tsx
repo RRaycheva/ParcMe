@@ -1,5 +1,5 @@
 import React from 'react';
-import { ImageBackground, Keyboard, KeyboardAvoidingView } from 'react-native';
+import { ImageBackground, Keyboard, View } from 'react-native';
 import { styles } from './Background.styles';
 
 export default function Background({ children }) {
@@ -8,12 +8,9 @@ export default function Background({ children }) {
       source={require('../../assets/background_dot.png')}
       resizeMode="repeat"
       style={styles.background}>
-      <KeyboardAvoidingView
-        style={styles.container}
-        onTouchStart={Keyboard.dismiss}
-        behavior="padding">
+      <View style={styles.container} onTouchStart={Keyboard.dismiss}>
         {children}
-      </KeyboardAvoidingView>
+      </View>
     </ImageBackground>
   );
 }

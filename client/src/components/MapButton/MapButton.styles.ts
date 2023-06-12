@@ -1,6 +1,15 @@
-import { Pressable } from 'react-native';
+import { Pressable, View } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import styled from 'styled-components';
+
+export const ViewContainer = styled(View)`
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+  z-index: 100;
+  justify-content: center;
+  align-items: center;
+`;
 
 export const Container = styled(Pressable)`
   padding-vertical: 11px;
@@ -9,13 +18,15 @@ export const Container = styled(Pressable)`
   display: flex;
   background: black;
   flex-direction: row;
-  position: absolute;
   flex: 1;
-  bottom: 20px;
+  width: 80px;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
-  z-index: 100;
+  shadow-opacity: 0.5;
+  shadow-radius: 5px;
+  shadow-color: black;
+  shadow-offset: 0px 0px;
+  elevation: 5;
 `;
 export const MapIcon = styled(Icon).attrs({
   name: 'map',

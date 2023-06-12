@@ -1,41 +1,71 @@
-import { MAPBOX_TOKEN } from '@env';
-import React, { useState } from 'react';
-import { SafeAreaView } from 'react-native';
+import React, { useEffect } from 'react';
+import { ListRenderItem } from 'react-native';
 import Card from '../../components/Card';
-import MapButton from '../../components/MapButton';
+
+import { StackScreenProps } from '@react-navigation/stack';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { connect } from 'react-redux';
 import Search from '../../components/Search';
+import { getGarages as getGaragesAction } from '../../redux/actions/garages';
+import { GaragesState } from '../../redux/reducers/garages';
+import { RootState } from '../../redux/store';
+import { GarageDto } from '../../services/garageService';
+import MapSheet from '../MapModal';
+import { CardList, Container, SearchContainer } from './Home.styles';
 
-import Mapbox from '@rnmapbox/maps';
-import {
-  CardList,
-  Container,
-  MapContainer,
-  SearchContainer,
-} from './Home.styles';
-
-Mapbox.setAccessToken(MAPBOX_TOKEN);
-
-function Home() {
-  const [isMapOpen, setIsMapOpen] = useState(false);
-  const renderCard = ({ index }) => {
-    return <Card key={`home-card-${index}`} />;
+interface HomeProps extends StackScreenProps<any> {
+  garages: GaragesState;
+  getGarages: () => Promise<void>;
+}
+function Home({ getGarages, garages, navigation }: HomeProps) {
+  const renderCard: ListRenderItem<GarageDto> = ({ item }) => {
+    const id = `home-card-${item.id}`;
+    return (
+      <Card
+        key={id}
+        id={id}
+        images={item.pictures}
+        title={item.name}
+        subtitle={item.addressName}
+        price={item.pricePerHour}
+        onPress={() =>
+          navigation.navigate('DetailPage', { garage: { ...item, id } })
+        }
+      />
+    );
   };
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', getGarages);
+    return unsubscribe;
+  }, [getGarages, navigation]);
 
   return (
     <Container>
-      <SearchContainer elevation={2}>
-        <SafeAreaView />
-        <Search />
-      </SearchContainer>
-      <MapButton onPress={() => setIsMapOpen(current => !current)} />
-      <CardList data={[...new Array(6).keys()]} renderItem={renderCard} />
-      {isMapOpen && (
-        <MapContainer>
-          <Mapbox.MapView style={{ flex: 1 }} />
-        </MapContainer>
-      )}
+      <CardList
+        data={garages}
+        stickyHeaderIndices={[0]}
+        contentContainerStyle={{ paddingBottom: '30%' }}
+        ListHeaderComponent={
+          <SearchContainer>
+            <SafeAreaView edges={['top']} />
+            <Search />
+          </SearchContainer>
+        }
+        renderItem={renderCard as any}
+      />
+      <MapSheet title={`${garages.length} garages available`} />
     </Container>
   );
 }
 
-export default Home;
+const mapStateToProps = ({ garages }: RootState) => {
+  return {
+    garages,
+  };
+};
+export default React.memo(
+  connect(mapStateToProps, {
+    getGarages: getGaragesAction,
+  })(Home),
+);

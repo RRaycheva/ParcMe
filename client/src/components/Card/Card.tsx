@@ -1,51 +1,65 @@
 import React from 'react';
-import { Dimensions } from 'react-native';
+import { Dimensions, Pressable, Text } from 'react-native';
+
+import { PARCK_ME_SERVER } from '@env';
 
 import Carousel from 'react-native-reanimated-carousel';
+import { SharedElement } from 'react-navigation-shared-element';
 import {
   CardImage,
-  CardImageContainer,
   CardInfoContainer,
-  CARD_MARGIN,
   Container,
   Price,
   Subtitle,
-  Title,
 } from './Card.styles';
 
-const exampleImages = [
-  'https://picsum.photos/id/237/200/300',
-  'https://picsum.photos/id/240/200/300',
-  'https://picsum.photos/id/250/200/300',
-  'https://picsum.photos/id/230/200/300',
-];
-
-function Card() {
+interface CardProps {
+  id: string | number;
+  images?: string[];
+  title: string;
+  subtitle?: string;
+  price?: number;
+  onPress?: () => void;
+}
+function Card({ images, title, subtitle, price, onPress, id }: CardProps) {
   const { width } = Dimensions.get('window');
   const renderImage = ({ item, index }) => {
     return (
-      <CardImageContainer>
-        <CardImage source={{ uri: item }} key={`card-image-${index}`} />
-      </CardImageContainer>
+      // <CardImageContainer>
+      <CardImage
+        source={{ uri: `${PARCK_ME_SERVER}${item}` }}
+        key={`card-image-${index}`}
+      />
+      // </CardImageContainer>
     );
   };
+
   return (
-    <Container elevation={6}>
-      <Carousel
-        data={exampleImages}
-        renderItem={renderImage}
-        width={width - CARD_MARGIN * 2}
-        height={200}
-        loop={false}
-      />
-      <CardInfoContainer>
-        <Title>Title</Title>
-        <Subtitle>Subtitle</Subtitle>
-        <Price>
-          price <Subtitle>/ monnth</Subtitle>
-        </Price>
-      </CardInfoContainer>
-    </Container>
+    <Pressable onPress={onPress}>
+      <Container id={`${id}-container`}>
+        <Carousel
+          key={`${id}-container`}
+          data={images || []}
+          renderItem={renderImage}
+          width={width}
+          height={300}
+          loop={false}
+          style={{ alignSelf: 'center' }}
+        />
+        <SharedElement id={`${id}-description`} style={{ zIndex: 1 }}>
+          <CardInfoContainer
+            colors={['transparent', 'rgba(255,255,255, 0.5)', 'white']}>
+            <Text style={{ fontSize: 24 }}>{title}</Text>
+            <SharedElement id={`${id}-address`}>
+              <Text>{subtitle}</Text>
+            </SharedElement>
+            <Price>
+              {price} <Subtitle>/ hour</Subtitle>
+            </Price>
+          </CardInfoContainer>
+        </SharedElement>
+      </Container>
+    </Pressable>
   );
 }
 

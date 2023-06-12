@@ -3,17 +3,21 @@ import {
   HttpException,
   HttpStatus,
   UnauthorizedException,
+  Inject,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '@/api/user/user.entity';
 import * as bcrypt from 'bcryptjs';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthHelper {
   @InjectRepository(User)
   private readonly repository: Repository<User>;
+
+  @Inject(ConfigService) config: ConfigService;
 
   private readonly jwt: JwtService;
 
@@ -50,7 +54,9 @@ export class AuthHelper {
 
   // Validate JWT Token, throw forbidden error if JWT Token is invalid
   public async validate(token: string): Promise<User | never> {
-    const decoded: User = this.jwt.verify(token);
+    const decoded: User = this.jwt.verify(token, {
+      secret: this.config.get('JWT_KEY'),
+    });
 
     if (!decoded) {
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);

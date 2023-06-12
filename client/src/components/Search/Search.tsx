@@ -6,7 +6,7 @@ function Search() {
   return (
     <Container elevation={6}>
       <SearchIcon />
-      <TextInput placeholder="Search..." />
+      <TextInput placeholder="Search..." style={{ flex: 1 }} />
     </Container>
   );
 }

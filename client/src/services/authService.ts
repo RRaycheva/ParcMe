@@ -1,14 +1,6 @@
 import { storeData } from '../helpers/helpers';
 import { Service } from './baseService';
-
-export interface UserDto {
-  id: number;
-  email: string;
-  name: string | null;
-  lastLoginAt: Date | null;
-  password: string;
-  isAdmin: boolean;
-}
+import { UserDto } from './userService';
 
 export interface AuthResponseDto {
   token: string;

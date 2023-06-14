@@ -12,6 +12,6 @@ export const Container = styled(TouchableOpacity)`
   shadow-color: black;
   justify-content: center;
   align-items: center;
-  min-width: 40px;
-  min-height: 40px;
+  width: 40px;
+  height: 40px;
 `;

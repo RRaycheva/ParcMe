@@ -1,5 +1,10 @@
-import { Injectable, StreamableFile } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import {
+  Injectable,
+  NotFoundException,
+  StreamableFile,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { ILike, Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Garage } from './garage.entity';
 import { GarageDto } from './garage.dto';
@@ -26,6 +31,22 @@ export class GarageService {
     return this.repository.save(garage);
   }
 
+  public getPendingApproval(user: User) {
+    if (!user.isAdmin)
+      throw new UnauthorizedException('Only admin can view pending garages');
+    return this.repository.find({
+      where: { approved: false },
+      relations: ['user'],
+    });
+  }
+
+  public getApprovedGarages() {
+    return this.repository.find({
+      where: { approved: true },
+      relations: ['user'],
+    });
+  }
+
   public getAll() {
     return this.repository.find();
   }
@@ -42,6 +63,18 @@ export class GarageService {
     }
     //
     return this.repository.delete({});
+  }
+
+  public async deleteGarage(user: User, garageId: number) {
+    const garage = await this.repository.findOne({
+      where: { id: garageId },
+      relations: ['user'],
+    });
+    if (user?.isAdmin || garage.user.id === user?.id) {
+      return await this.repository.delete({ id: garageId });
+    } else {
+      return new UnauthorizedException();
+    }
   }
 
   public async uploadImages(id: number, files: Array<Express.Multer.File>) {
@@ -75,5 +108,25 @@ export class GarageService {
       console.error(error);
       return false;
     }
+  }
+
+  public async approveGarage(user: User, garageId: number) {
+    if (!user.isAdmin)
+      throw new UnauthorizedException('Only admin can approve');
+    if (!(await this.repository.exist({ where: { id: garageId } })))
+      throw new NotFoundException('Garage not found');
+    return await this.repository.update({ id: garageId }, { approved: true });
+  }
+
+  public async searchGarages(query: string) {
+    const likeQuery = ILike(`%${query}%`);
+    return await this.repository.find({
+      where: [
+        { user: { name: likeQuery }, approved: true },
+        { name: likeQuery, approved: true },
+        { addressName: likeQuery, approved: true },
+      ],
+      relations: ['user'],
+    });
   }
 }

@@ -7,6 +7,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Query,
   Req,
   Res,
   UploadedFiles,
@@ -31,10 +32,27 @@ export class GarageController {
   @Inject(GarageService)
   private readonly service: GarageService;
 
+  @Get()
+  findAll() {
+    return this.service.getApprovedGarages();
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  deleteGarage(@Req() req, @Param('id') garageId: number) {
+    return this.service.deleteGarage(req.user, garageId);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Post()
   create(@Req() req, @Body() body: GarageDto): Promise<Garage | never> {
     return this.service.create(body, req.user as User);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/approve')
+  approveGarage(@Param('id') garageId: number, @Req() req) {
+    return this.service.approveGarage(req.user, garageId);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -81,21 +99,27 @@ export class GarageController {
     res.sendStatus(404);
   }
 
-  @Get()
-  findAll() {
-    return this.service.getAll();
-  }
-
   @UseGuards(JwtAuthGuard)
   @Get('/me')
   findMy(@Req() req) {
     return this.service.getUserGarages(req.user);
   }
 
-  //TODO: only for test
-  @Delete()
-  async deleteAll() {
-    await this.service.deleteAll();
-    return '';
+  @UseGuards(JwtAuthGuard)
+  @Get('/pending')
+  getPendingApproval(@Req() req) {
+    return this.service.getPendingApproval(req.user);
   }
+
+  @Get('/search')
+  searchGarages(@Query() { query }) {
+    return this.service.searchGarages(query);
+  }
+
+  //TODO: only for test
+  //   @Delete()
+  //   async deleteAll() {
+  //     await this.service.deleteAll();
+  //     return '';
+  //   }
 }

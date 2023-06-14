@@ -1,14 +1,17 @@
 import React from 'react';
 import { createSharedElementStackNavigator } from 'react-navigation-shared-element';
 import AddNewPlace from '../screens/AddNewPlace/AddNewPlace';
+import ChatPage from '../screens/ChatPage';
 import { DetailPage } from '../screens/DetailPage';
 import { Launcher } from '../screens/Launcher';
 import Login from '../screens/Login';
+import PendingGarages from '../screens/PendingGarages/PendingGarages';
 import Register from '../screens/Register';
 import TabScreens from './TabScreens';
 import {
   defaultScreenOptions,
   modalOptions,
+  pushedPageOptions,
   sharedElementOptions,
 } from './options';
 
@@ -32,6 +35,16 @@ function MainScreens() {
         name="AddNewPlace"
         component={AddNewPlace}
         options={modalOptions}
+      />
+      <Stack.Screen
+        name="PendingGarages"
+        component={PendingGarages}
+        // options={}
+      />
+      <Stack.Screen
+        name="ChatPage"
+        component={ChatPage}
+        options={{ ...pushedPageOptions, headerBackTitle: 'Inbox' }}
       />
     </Stack.Navigator>
   );

@@ -36,6 +36,9 @@ export class Garage extends BaseEntity {
   @Column({ default: '' })
   public description: string;
 
+  @Column({ default: false })
+  public approved: boolean;
+
   @ManyToOne(() => User, (user) => user.garages, {
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',

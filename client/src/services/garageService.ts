@@ -1,5 +1,6 @@
 import { Asset } from 'react-native-image-picker';
 import { Service } from './baseService';
+import { UserDto } from './userService';
 
 export interface GarageDto {
   id?: string;
@@ -10,12 +11,15 @@ export interface GarageDto {
   pricePerHour: number;
   pictures?: string[];
   dateOfPost?: Date;
+  approved?: boolean;
   description: string;
+  user: UserDto;
 }
 
 export interface FavouritesDto {
   garageId: string;
   garage: GarageDto;
+  user: UserDto;
 }
 
 class GarageService extends Service {
@@ -78,6 +82,32 @@ class GarageService extends Service {
       `${this.defaultEndpoint}/user/favourite/${garageId}`,
       'DELETE',
     );
+  }
+
+  async getPending() {
+    const response = await this.handleRequest(
+      `${this.defaultEndpoint}/garage/pending`,
+      'GET',
+    );
+    return response;
+  }
+
+  async approve(garageId: number | string) {
+    const response = await this.handleRequest(
+      `${this.defaultEndpoint}/garage/${garageId}/approve`,
+      'GET',
+    );
+    return response;
+  }
+
+  async search(query: string) {
+    const response = await this.handleRequest(
+      `${this.defaultEndpoint}/garage/search?query=${encodeURIComponent(
+        query,
+      )}`,
+      'GET',
+    );
+    return response;
   }
 }
 

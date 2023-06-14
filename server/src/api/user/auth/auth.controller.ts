@@ -25,7 +25,6 @@ export class AuthController {
   private register(
     @Body() body: RegisterDto,
   ): Promise<AuthResponseDto | never> {
-    console.log(body);
     return this.service.register(body);
   }
 

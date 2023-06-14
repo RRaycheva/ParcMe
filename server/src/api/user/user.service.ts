@@ -48,7 +48,7 @@ export class UserService {
   public async getFavourites(userId: number) {
     const res = await this.favouritesRepository.find({
       where: { userId },
-      relations: ['garage'],
+      relations: ['garage', 'user'],
       select: ['garageId'],
     });
     return res;
@@ -75,12 +75,24 @@ export class UserService {
         'uploads/user',
         userId.toString(),
       );
-      if (!existsSync(imageLocation)) return false;
+      if (!existsSync(imageLocation)) return this.readDefaultProfilePicture();
       const file = createReadStream(imageLocation);
       return new StreamableFile(file);
     } catch (error) {
       console.error(error);
-      return false;
+      return this.readDefaultProfilePicture();
     }
+  }
+
+  public readDefaultProfilePicture() {
+    try {
+      const imageLocation = path.join(
+        process.cwd(),
+        'uploads/default',
+        'profile_picture',
+      );
+      const file = createReadStream(imageLocation);
+      return new StreamableFile(file);
+    } catch (error) {}
   }
 }

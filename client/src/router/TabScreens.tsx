@@ -54,7 +54,13 @@ function TabScreens() {
           tabBarIcon: props => <FontAwesome name="heart-o" {...props} />,
         }}
       />
-      <Tab.Screen name="Inbox" component={Inbox} />
+      <Tab.Screen
+        name="Inbox"
+        component={Inbox}
+        options={{
+          tabBarIcon: props => <MaterialIcon name="inbox" {...props} />,
+        }}
+      />
       <Tab.Screen
         name="Account"
         component={Account}

@@ -7,6 +7,7 @@ import Navigation from './router/Navigation';
 
 function App() {
   StatusBar.setBarStyle('dark-content');
+
   return (
     <Provider store={store}>
       <GestureHandlerRootView style={{ flex: 1 }}>

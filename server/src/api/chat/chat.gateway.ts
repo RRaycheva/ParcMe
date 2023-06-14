@@ -9,10 +9,8 @@ import {
 import { ChatService } from './chat.service';
 import { Socket, Server } from 'socket.io';
 import { ChatDto } from './chat.dto';
-import { JwtAuthGuard } from '../user/auth/auth.guard';
-import { UseGuards } from '@nestjs/common';
+import { WsException } from '@nestjs/websockets';
 
-// @UseGuards(JwtAuthGuard)
 @WebSocketGateway({
   cors: {
     origin: '*',
@@ -26,11 +24,19 @@ export class ChatGateway
   @WebSocketServer() server: Server;
 
   @SubscribeMessage('sendMessage')
-  async handleSendMessage(client: Socket, payload: ChatDto): Promise<void> {
+  async handleSendMessage(client: Socket, payload: ChatDto) {
     const user = await this.chatService.getUserFromSocket(client);
     if (!user) client.disconnect();
-    await this.chatService.createMessage(user.id, payload);
-    client.emit('receiveMessage', payload);
+
+    // Check if receiver exists
+    const receiver = await this.chatService.getUserById(payload.receiverId);
+    if (!receiver) throw new WsException('Receiver does not exists');
+
+    const message = await this.chatService.createMessage(user.id, payload);
+
+    this.server.to(receiver.email).emit('receiveMessage', message);
+    // Pipe response to ACK
+    return message;
   }
 
   afterInit(server: Server) {
@@ -43,7 +49,10 @@ export class ChatGateway
 
   async handleConnection(client: Socket, ...args: any[]) {
     const user = await this.chatService.getUserFromSocket(client);
-    console.log(`connect: ${client.id}`);
     if (!user) client.disconnect();
+    // Join user specific room
+    await client.join(user.email);
+    console.log(`joined: ${client.id} ${user.email}`);
+    //
   }
 }

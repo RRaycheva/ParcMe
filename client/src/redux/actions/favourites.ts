@@ -6,7 +6,7 @@ export const getFavourites = () => {
   return async (dispatch: AppDispatch) => {
     try {
       const favourites = await garageService.getFavourites();
-      const garages = favourites.map(e => e.garage);
+      const garages = favourites.map(e => ({ ...e.garage, user: e.user }));
       dispatch({
         type: GET_FAVOURITES,
         payload: garages,

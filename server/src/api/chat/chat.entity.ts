@@ -22,7 +22,10 @@ export class Chat {
   @Column()
   receiverId: number;
 
-  @ManyToOne(() => User, (user) => user.chats)
+  @ManyToOne(() => User, (user) => user.chats, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   @JoinColumn()
   receiver: User;
 

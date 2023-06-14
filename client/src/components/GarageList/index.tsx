@@ -10,6 +10,7 @@ interface GarageListProps {
   id?: string;
   onSelect?: (garage: GarageDto & { shareId: string }) => void;
   header?: React.ReactElement;
+  emptyMessage?: React.ReactElement | null | undefined;
   stickyHeader?: boolean;
 }
 function GarageList({
@@ -18,6 +19,7 @@ function GarageList({
   onSelect,
   header,
   stickyHeader,
+  emptyMessage,
 }: GarageListProps) {
   const renderCard: ListRenderItem<GarageDto> = useCallback(
     ({ item }) => {
@@ -44,6 +46,7 @@ function GarageList({
       contentContainerStyle={{ paddingBottom: '30%' }}
       ListHeaderComponent={header}
       renderItem={renderCard as any}
+      ListEmptyComponent={emptyMessage}
     />
   );
 }

@@ -4,7 +4,6 @@ import styled from 'styled-components/native';
 
 export const styles = StyleSheet.create({
   listSection: {
-    flex: 1,
     width: '100%',
   },
   logoutButton: { maxWidth: '60%' },
@@ -12,7 +11,6 @@ export const styles = StyleSheet.create({
 });
 
 export const Container = styled(ScrollView)`
-  /* margin: 0 24px; */
   padding: 48px 18px;
 `;
 

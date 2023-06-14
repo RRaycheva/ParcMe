@@ -1,7 +1,9 @@
 import { PARCK_ME_SERVER } from '@env';
+import { Route } from '@react-navigation/native';
 import { StackScreenProps } from '@react-navigation/stack';
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { Dimensions, Text, View } from 'react-native';
+import { isNil } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { Alert, Dimensions, Text, View } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import {
   Directions,
@@ -9,6 +11,7 @@ import {
   GestureDetector,
 } from 'react-native-gesture-handler';
 import { trigger } from 'react-native-haptic-feedback';
+import { Button } from 'react-native-paper';
 import Animated, {
   interpolate,
   runOnJS,
@@ -22,26 +25,38 @@ import { SharedElement } from 'react-navigation-shared-element';
 import { connect } from 'react-redux';
 import { CardImage } from '../../components/Card/Card.styles';
 import { AddToFavourites, CloseButton } from '../../components/IconButtons';
+import { ProfilePicture } from '../../components/MessageListItem/style';
 import { getFavourites } from '../../redux/actions/favourites';
 import { RootState } from '../../redux/store';
+import { AuthResponseDto } from '../../services/authService';
 import garageService, { GarageDto } from '../../services/garageService';
-import { HeaderContainer } from './DetailPage.style';
+import { HeaderContainer, HostInfoContainer } from './DetailPage.style';
 
 const END_POSITION = 100;
 
 interface DetailPageProps extends StackScreenProps<any> {
   favourites: GarageDto[];
+  user: AuthResponseDto['user'];
   getFavourites: () => Promise<any>;
 }
 function DetailPage({
   route,
   navigation,
   favourites,
+  user,
   getFavourites,
 }: DetailPageProps) {
   const { garage } = route.params as any;
-  const { pictures, id, name, addressName, description, shareId } =
-    garage as GarageDto & { shareId: string };
+  const {
+    pictures,
+    id,
+    name,
+    addressName,
+    description,
+    shareId,
+    approved,
+    user: host,
+  } = garage as GarageDto & { shareId: string };
 
   const finalize = useSharedValue(false);
   const flicked = useSharedValue(false);
@@ -49,20 +64,34 @@ function DetailPage({
   const containerValues = useSharedValue({ x: 0, y: 0, opacity: 1 });
   const isDragging = useSharedValue(false);
   const scrollOffset = useSharedValue(0);
+  const carouselContainerRef = useRef<any>(null);
 
   const isInFavourite = useMemo(
     () => !!favourites.find(e => e.id === id),
     [favourites, id],
   );
 
+  const isPendingAproval = useMemo(
+    () => !approved && user?.isAdmin,
+    [user?.isAdmin, approved],
+  );
+
   useEffect(() => {
     getFavourites();
   }, [getFavourites]);
+
+  // useEffect(() => {
+  //   const carouselContainer = carouselContainerRef.current;
+  //   return () => {
+  //     carouselContainer.transitionTo({ opacity: 0 });
+  //   };
+  // }, []);
 
   const toggleFavourite = useCallback(async () => {
     if (!id) {
       return;
     }
+    trigger('notificationSuccess');
     isInFavourite
       ? await garageService.removeFromFavourite(id)
       : await garageService.addToFavourite(id);
@@ -76,15 +105,18 @@ function DetailPage({
     .minDuration(100);
 
   const flingGesture = Gesture.Fling()
-    .direction(Directions.DOWN)
+    .direction(Directions.DOWN | Directions.RIGHT)
     .onStart(() => {
       flicked.value = true;
     });
 
   const panGesture = Gesture.Pan()
     .manualActivation(true)
-    .onTouchesMove((_e, state) => {
-      if ((isDragging.value || flicked.value) && scrollOffset.value <= 0) {
+    .onTouchesMove((e, state) => {
+      if (
+        ((isDragging.value || flicked.value) && scrollOffset.value <= 0) ||
+        e.changedTouches[0].x < 25
+      ) {
         state.activate();
         if (!started.value) {
           runOnJS(trigger)('impactMedium');
@@ -145,6 +177,41 @@ function DetailPage({
     ],
   }));
 
+  const handleApproval = useCallback(() => {
+    if (isNil(id)) {
+      return;
+    }
+    Alert.alert(
+      'Approval',
+      'Do you approve this garage request?',
+      [
+        {
+          text: 'No',
+          style: 'cancel',
+        },
+        {
+          text: 'Yes',
+          onPress: async () => {
+            await garageService.approve(id);
+            navigation.goBack();
+          },
+          style: 'default',
+        },
+      ],
+      {
+        cancelable: false,
+      },
+    );
+  }, [id, navigation]);
+
+  const contackHost = useCallback(() => {
+    if (host.id === user.id) {
+      Alert.alert('Ooops', 'You can not contact yourself');
+      return;
+    }
+    navigation.navigate('ChatPage', { receiver: host });
+  }, [host, user, navigation]);
+
   const scrollHandler = useAnimatedScrollHandler(event => {
     scrollOffset.value = event.contentOffset.y;
   });
@@ -177,14 +244,16 @@ function DetailPage({
             <AddToFavourites active={isInFavourite} onPress={toggleFavourite} />
           </HeaderContainer>
           <SharedElement id={`${shareId}-container`}>
-            <Carousel
-              key={`${shareId}-container`}
-              data={pictures || []}
-              renderItem={renderImage}
-              width={Dimensions.get('screen').width}
-              height={300}
-              loop={false}
-            />
+            <Animatable.View ref={carouselContainerRef}>
+              <Carousel
+                key={`${shareId}-container`}
+                data={pictures || []}
+                renderItem={renderImage}
+                width={Dimensions.get('screen').width}
+                height={300}
+                loop={false}
+              />
+            </Animatable.View>
           </SharedElement>
           <View style={{ paddingHorizontal: 8 }}>
             <SharedElement id={`${shareId}-description`}>
@@ -199,6 +268,18 @@ function DetailPage({
               style={{ fontSize: 18, lineHeight: 24, marginVertical: 32 }}>
               {description}
             </Animatable.Text>
+            <HostInfoContainer>
+              <Text>Hosted by {host.name}</Text>
+              <ProfilePicture
+                source={{ uri: `${PARCK_ME_SERVER}${host.profile_picture}` }}
+              />
+            </HostInfoContainer>
+            <Button mode="outlined" onPress={contackHost}>
+              Contack host
+            </Button>
+            {isPendingAproval && (
+              <Button onPress={handleApproval}>Approve</Button>
+            )}
           </View>
         </Animated.View>
       </GestureDetector>
@@ -206,8 +287,12 @@ function DetailPage({
   );
 }
 
-DetailPage.sharedElements = route => {
-  const { garage } = route.params as any;
+DetailPage.sharedElements = (route: Route<any>, otherRoute: Route<any>) => {
+  const { garage, disableSharedTransition } = route.params as any;
+  // Do not transition when going to Chat
+  if (otherRoute.name === 'ChatPage' || disableSharedTransition) {
+    return [];
+  }
   return [
     {
       id: `${garage.shareId}-container`,
@@ -227,9 +312,10 @@ DetailPage.sharedElements = route => {
   ];
 };
 
-const mapStateToProps = ({ favourites }: RootState) => {
+const mapStateToProps = ({ favourites, auth }: RootState) => {
   return {
     favourites,
+    user: auth.user,
   };
 };
 export default connect(mapStateToProps, {

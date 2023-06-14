@@ -7,6 +7,7 @@ import {
   ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
+  Unique,
 } from 'typeorm';
 import { Garage } from '../garage/garage.entity';
 import { Favourites } from '../favourites/favourites.entity';
@@ -17,7 +18,7 @@ export class User extends BaseEntity {
   @PrimaryGeneratedColumn()
   public id!: number;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', unique: true })
   public email!: string;
 
   @Exclude()
@@ -33,7 +34,7 @@ export class User extends BaseEntity {
   @Column({ type: 'boolean', default: false })
   public isAdmin: boolean;
 
-  @Column({ default: '' })
+  @Column({ default: '/user/profile/default' })
   public profile_picture: string;
 
   @OneToMany(() => Garage, (garage) => garage.user, {
@@ -60,6 +61,9 @@ export class User extends BaseEntity {
   })
   favourites?: Garage[];
 
-  @OneToMany(() => Chat, (chat) => chat.receiver)
+  @OneToMany(() => Chat, (chat) => chat.receiver, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   chats: Chat[];
 }

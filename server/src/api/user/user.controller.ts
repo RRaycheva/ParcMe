@@ -97,6 +97,16 @@ export class UserController {
     res.sendStatus(404);
   }
 
+  @Get('profile/default')
+  getDefaultProfilePicture(@Res({ passthrough: true }) res: Response) {
+    const image = this.service.readDefaultProfilePicture();
+    if (image) {
+      res.set({ 'Content-Type': 'image/png' });
+      return image;
+    }
+    res.sendStatus(404);
+  }
+
   @Get('favourite/:id')
   @UseGuards(JwtAuthGuard)
   private addToFavourites(@Req() req, @Param('id', ParseIntPipe) id: number) {

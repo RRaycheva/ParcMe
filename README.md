@@ -1,4 +1,3 @@
-ParcMe
 Diploma Thesis - ParcMe ia a application where you can find parcing spot.
 
 Used Technologies:

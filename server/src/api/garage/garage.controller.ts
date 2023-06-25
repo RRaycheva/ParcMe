@@ -18,7 +18,7 @@ import { GarageDto } from './garage.dto';
 import { Garage } from './garage.entity';
 import { GarageService } from './garage.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { Multer, diskStorage } from 'multer';
+import { diskStorage } from 'multer';
 import { Request, Response } from 'express';
 
 import { existsSync } from 'fs';

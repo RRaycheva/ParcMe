@@ -1,5 +1,8 @@
 import React from 'react';
-import { createSharedElementStackNavigator } from 'react-navigation-shared-element';
+import {
+  SharedElementSceneComponent,
+  createSharedElementStackNavigator,
+} from 'react-navigation-shared-element';
 import AddNewPlace from '../screens/AddNewPlace/AddNewPlace';
 import ChatPage from '../screens/ChatPage';
 import { DetailPage } from '../screens/DetailPage';
@@ -28,7 +31,7 @@ function MainScreens() {
       <Stack.Screen name="RegisterScreen" component={Register} />
       <Stack.Screen
         name="SharedElementDetailPage"
-        component={DetailPage}
+        component={DetailPage as SharedElementSceneComponent}
         options={sharedElementOptions}
       />
       <Stack.Screen
@@ -36,11 +39,7 @@ function MainScreens() {
         component={AddNewPlace}
         options={modalOptions}
       />
-      <Stack.Screen
-        name="PendingGarages"
-        component={PendingGarages}
-        // options={}
-      />
+      <Stack.Screen name="PendingGarages" component={PendingGarages} />
       <Stack.Screen
         name="ChatPage"
         component={ChatPage}

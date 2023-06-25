@@ -18,8 +18,8 @@ interface LoginScreenProps extends NativeStackScreenProps<any> {
 }
 
 function LoginScreen({ navigation, setUser }: LoginScreenProps) {
-  const [email, setEmail] = useState({ value: 'admin@parc.me', error: '' });
-  const [password, setPassword] = useState({ value: '12345678', error: '' });
+  const [email, setEmail] = useState({ value: '', error: '' });
+  const [password, setPassword] = useState({ value: '', error: '' });
 
   const onLoginPressed = async () => {
     const emailError = emailValidator(email.value);
@@ -65,12 +65,6 @@ function LoginScreen({ navigation, setUser }: LoginScreenProps) {
         errorText={password.error}
         secureTextEntry
       />
-      <View style={styles.forgotPassword}>
-        <TouchableOpacity
-          onPress={() => navigation.navigate('ResetPasswordScreen')}>
-          <Text style={styles.forgot}>Forgot your password?</Text>
-        </TouchableOpacity>
-      </View>
       <Button mode="contained" onPress={onLoginPressed}>
         Login
       </Button>

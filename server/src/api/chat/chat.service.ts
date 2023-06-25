@@ -7,7 +7,6 @@ import { Socket } from 'socket.io';
 import { WsException } from '@nestjs/websockets';
 import { AuthService } from '../user/auth/auth.service';
 import { User } from '../user/user.entity';
-import { UserService } from '../user/user.service';
 
 @Injectable()
 export class ChatService {

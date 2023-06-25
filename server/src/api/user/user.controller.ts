@@ -23,7 +23,6 @@ import { UserService } from './user.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { existsSync } from 'fs';
-import { extname } from 'path';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require('fs/promises');
 

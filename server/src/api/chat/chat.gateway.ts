@@ -47,12 +47,11 @@ export class ChatGateway
     console.log(`Disconnected: ${client.id}`);
   }
 
-  async handleConnection(client: Socket, ...args: any[]) {
+  async handleConnection(client: Socket) {
     const user = await this.chatService.getUserFromSocket(client);
     if (!user) client.disconnect();
     // Join user specific room
     await client.join(user.email);
     console.log(`joined: ${client.id} ${user.email}`);
-    //
   }
 }

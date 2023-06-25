@@ -4,7 +4,7 @@ import {
   StreamableFile,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ILike, Like, Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Garage } from './garage.entity';
 import { GarageDto } from './garage.dto';
@@ -57,11 +57,9 @@ export class GarageService {
 
   public async deleteAll() {
     const imageLocation = path.join(process.cwd(), 'uploads/garage');
-    // Remove old files
     for (const file of await fs.readdir(imageLocation)) {
       await rm(path.join(imageLocation, file), { recursive: true });
     }
-    //
     return this.repository.delete({});
   }
 
